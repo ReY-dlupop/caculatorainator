@@ -89,12 +89,27 @@
             background: #4CAF50;
             color: white;
         }
-        canvas {
+        .chart-container {
+            position: relative;
             margin-top: 20px;
+        }
+        canvas {
             border: 1px solid #ddd;
             border-radius: 8px;
             width: 100%;
             max-width: 850px;
+        }
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            pointer-events: none;
+            display: none;
+            white-space: nowrap;
+            z-index: 10;
         }
         .formula {
             font-size: 18px;
@@ -152,7 +167,10 @@
         <p class="formula" id="formula"></p>
         <p class="prediction" id="prediction"></p>
         <div id="resultContent"></div>
-        <canvas id="chart" width="850" height="400"></canvas>
+        <div class="chart-container" id="chartContainer">
+            <canvas id="chart" width="850" height="400"></canvas>
+            <div class="tooltip" id="tooltip"></div>
+        </div>
     </div>
 
     <script>
@@ -294,28 +312,34 @@
         function drawChart(xVals, yVals, type, predX, predY, years) {
             let canvas = document.getElementById('chart');
             let ctx = canvas.getContext('2d');
+            let tooltip = document.getElementById('tooltip');
+            let container = document.getElementById('chartContainer');
             
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            tooltip.style.display = 'none';
             
             let padding = 80;
             let w = canvas.width - padding * 2;
             let h = canvas.height - padding * 2;
             
             let allX = xVals.concat([predX]);
-            let minX = Math.min.apply(null, allX) - 1;
-            let maxX = Math.max.apply(null, allX) + 1;
+            let minX = Math.min.apply(null, allX) - 0.5;
+            let maxX = Math.max.apply(null, allX) + 1.5;
             
             let allY = yVals.concat([predY]);
-            let minY = Math.min.apply(null, allY);
-            let maxY = Math.max.apply(null, allY);
-            let range = maxY - minY;
-            if (range === 0) range = 10;
-            minY = minY - range * 0.3;
-            maxY = maxY + range * 0.3;
+            let dataMinY = Math.min.apply(null, yVals);
+            let dataMaxY = Math.max.apply(null, yVals);
+            let dataRange = dataMaxY - dataMinY;
+            if (dataRange === 0) dataRange = 10;
+            let minY = dataMinY - dataRange * 0.2;
+            let maxY = dataMaxY + dataRange * 0.5;
             
             function toX(val) { return padding + (val - minX) / (maxX - minX) * w; }
             function toY(val) { return padding + h - (val - minY) / (maxY - minY) * h; }
+            function fromX(cx) { return minX + (cx - padding) / w * (maxX - minX); }
+            function fromY(cy) { return minY + (padding + h - cy) / h * (maxY - minY); }
             
+            // Оси
             ctx.strokeStyle = '#333';
             ctx.lineWidth = 2;
             ctx.beginPath();
@@ -324,22 +348,30 @@
             ctx.lineTo(padding + w, padding + h);
             ctx.stroke();
             
+            // Подписи оси X — только целые
             ctx.fillStyle = '#333';
             ctx.font = '12px Arial';
             ctx.textAlign = 'center';
-            for (let i = Math.ceil(minX); i <= maxX; i++) {
+            for (let i = Math.ceil(minX); i <= Math.floor(maxX); i++) {
                 let x = toX(i);
                 if (x >= padding && x <= padding + w) {
                     ctx.fillText(i, x, padding + h + 20);
                 }
             }
+            
+            // Подписи оси Y — только 5 штук
             ctx.textAlign = 'right';
-            for (let i = Math.floor(minY / 10) * 10; i <= maxY; i += 20) {
-                let y = toY(i);
+            let ySteps = 5;
+            let yStep = (maxY - minY) / ySteps;
+            for (let i = 0; i <= ySteps; i++) {
+                let val = Math.round(minY + yStep * i);
+                let y = toY(val);
                 if (y >= padding && y <= padding + h) {
-                    ctx.fillText(i, padding - 10, y + 4);
+                    ctx.fillText(val, padding - 10, y + 4);
                 }
             }
+            
+            // Названия осей
             ctx.fillStyle = '#4CAF50';
             ctx.font = '14px Arial';
             ctx.textAlign = 'center';
@@ -350,20 +382,25 @@
             ctx.fillText('Продажи, тыс. шт. (Y)', 0, 0);
             ctx.restore();
             
+            // Точки данных
+            let dataPoints = [];
             for (let i = 0; i < xVals.length; i++) {
                 let cx = toX(xVals[i]);
                 let cy = toY(yVals[i]);
-                if (cx >= padding && cx <= padding + w && cy >= padding && cy <= padding + h) {
-                    ctx.fillStyle = '#e74c3c';
-                    ctx.beginPath();
-                    ctx.arc(cx, cy, 5, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.fillStyle = '#333';
-                    ctx.font = '11px Arial';
-                    ctx.fillText(years[i], cx, cy - 12);
-                }
+                dataPoints.push({x: cx, y: cy, year: years[i], value: yVals[i]});
+                ctx.fillStyle = '#e74c3c';
+                ctx.beginPath();
+                ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#333';
+                ctx.font = '11px Arial';
+                ctx.fillText(years[i], cx, cy - 12);
             }
             
+            // Точки тренда
+            let trendPoints = [];
+            
+            // Линия тренда
             ctx.strokeStyle = '#4CAF50';
             ctx.lineWidth = 2;
             ctx.beginPath();
@@ -381,6 +418,7 @@
                 for (let x = minX; x <= maxX; x += 0.1) {
                     let y = k*x + b;
                     let cx = toX(x), cy = toY(y);
+                    trendPoints.push({x: cx, y: cy, xVal: Math.round(x*10)/10, yVal: Math.round(y*10)/10});
                     if (firstPoint) { ctx.moveTo(cx, cy); firstPoint = false; }
                     else ctx.lineTo(cx, cy);
                 }
@@ -401,6 +439,7 @@
                 for (let x = minX; x <= maxX; x += 0.1) {
                     let y = a*x*x + b*x + c;
                     let cx = toX(x), cy = toY(y);
+                    trendPoints.push({x: cx, y: cy, xVal: Math.round(x*10)/10, yVal: Math.round(y*10)/10});
                     if (firstPoint) { ctx.moveTo(cx, cy); firstPoint = false; }
                     else ctx.lineTo(cx, cy);
                 }
@@ -418,6 +457,7 @@
                 for (let x = minX; x <= maxX; x += 0.1) {
                     let y = A * Math.pow(B, x);
                     let cx = toX(x), cy = toY(y);
+                    trendPoints.push({x: cx, y: cy, xVal: Math.round(x*10)/10, yVal: Math.round(y*10)/10});
                     if (firstPoint) { ctx.moveTo(cx, cy); firstPoint = false; }
                     else ctx.lineTo(cx, cy);
                 }
@@ -435,26 +475,76 @@
                     if (x < 0.01) continue;
                     let y = k*Math.log(x) + b;
                     let cx = toX(x), cy = toY(y);
+                    trendPoints.push({x: cx, y: cy, xVal: Math.round(x*10)/10, yVal: Math.round(y*10)/10});
                     if (firstPoint) { ctx.moveTo(cx, cy); firstPoint = false; }
                     else ctx.lineTo(cx, cy);
                 }
             }
             ctx.stroke();
             
+            // Прогнозная точка
             let px = toX(predX);
             let py = toY(predY);
-            if (px >= padding && px <= padding + w && py >= padding && py <= padding + h) {
-                ctx.fillStyle = '#e74c3c';
-                ctx.beginPath();
-                ctx.arc(px, py, 7, 0, Math.PI*2);
-                ctx.fill();
-                ctx.strokeStyle = '#e74c3c';
-                ctx.lineWidth = 3;
-                ctx.stroke();
-                ctx.fillStyle = '#333';
-                ctx.font = 'bold 13px Arial';
-                ctx.fillText('Прогноз: ' + predY, px, py - 18);
-            }
+            ctx.fillStyle = '#e74c3c';
+            ctx.beginPath();
+            ctx.arc(px, py, 7, 0, Math.PI*2);
+            ctx.fill();
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 13px Arial';
+            ctx.fillText('Прогноз: ' + predY, px, py - 18);
+            
+            // Всплывающая подсказка при движении мыши
+            canvas.onmousemove = function(e) {
+                let rect = canvas.getBoundingClientRect();
+                let mouseX = e.clientX - rect.left;
+                let mouseY = e.clientY - rect.top;
+                
+                // Ищем ближайшую точку тренда
+                let minDist = 20;
+                let closest = null;
+                for (let i = 0; i < trendPoints.length; i++) {
+                    let dx = mouseX - trendPoints[i].x;
+                    let dy = mouseY - trendPoints[i].y;
+                    let dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        closest = trendPoints[i];
+                    }
+                }
+                
+                // Проверяем точки данных
+                for (let i = 0; i < dataPoints.length; i++) {
+                    let dx = mouseX - dataPoints[i].x;
+                    let dy = mouseY - dataPoints[i].y;
+                    let dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        closest = {x: dataPoints[i].x, y: dataPoints[i].y, xVal: xVals[i], yVal: yVals[i], isData: true, year: years[i]};
+                    }
+                }
+                
+                if (closest) {
+                    let text;
+                    if (closest.isData) {
+                        text = 'Год: ' + closest.year + ' | Продажи: ' + closest.yVal + ' тыс. шт.';
+                    } else {
+                        text = 'X: ' + closest.xVal + ' | Y: ' + closest.yVal + ' тыс. шт.';
+                    }
+                    tooltip.innerHTML = text;
+                    tooltip.style.display = 'block';
+                    tooltip.style.left = (closest.x + 15) + 'px';
+                    tooltip.style.top = (closest.y - 30) + 'px';
+                } else {
+                    tooltip.style.display = 'none';
+                }
+            };
+            
+            canvas.onmouseleave = function() {
+                tooltip.style.display = 'none';
+            };
         }
     </script>
 
