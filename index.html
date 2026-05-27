@@ -2,87 +2,127 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Калькулятор прогноза продаж</title>
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
         body {
             font-family: Arial, sans-serif;
-            max-width: 900px;
-            margin: 20px auto;
-            padding: 20px;
             background: #f5f5f5;
+            padding: 10px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
         }
         h1 {
             text-align: center;
             color: #333;
+            font-size: clamp(18px, 4vw, 28px);
+            margin-bottom: 15px;
         }
         .description {
             background: #fff;
-            padding: 15px;
+            padding: 12px;
             border-radius: 8px;
-            margin-bottom: 20px;
+            margin-bottom: 12px;
+            font-size: clamp(12px, 2.5vw, 14px);
         }
         .input-area {
             background: #fff;
-            padding: 15px;
+            padding: 12px;
             border-radius: 8px;
-            margin-bottom: 20px;
+            margin-bottom: 12px;
+        }
+        .input-area h3 {
+            font-size: clamp(14px, 3vw, 16px);
+            margin-bottom: 8px;
         }
         textarea {
             width: 100%;
-            height: 100px;
-            font-size: 14px;
+            height: clamp(80px, 20vw, 100px);
+            font-size: clamp(13px, 2.5vw, 14px);
             padding: 10px;
             box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
         }
         label {
             font-weight: bold;
-            margin-right: 10px;
+            margin-right: 8px;
+            font-size: clamp(12px, 2.5vw, 14px);
         }
         input[type="number"] {
-            width: 80px;
-            padding: 5px;
-            font-size: 14px;
+            width: 70px;
+            padding: 6px;
+            font-size: clamp(13px, 2.5vw, 14px);
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
         .tabs {
             display: flex;
-            gap: 10px;
-            margin: 15px 0;
+            gap: 6px;
+            margin: 10px 0;
             flex-wrap: wrap;
         }
         .tab {
-            padding: 10px 20px;
+            padding: 8px 12px;
             background: #ddd;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: clamp(11px, 2.2vw, 14px);
+            flex: 1;
+            min-width: 70px;
+            text-align: center;
+            transition: background 0.2s;
         }
         .tab.active {
             background: #4CAF50;
             color: white;
         }
+        .tab:active {
+            transform: scale(0.96);
+        }
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin: 8px 0;
+        }
         .result {
             background: #fff;
-            padding: 15px;
+            padding: 12px;
             border-radius: 8px;
             display: none;
+            overflow-x: auto;
         }
         .result h3 {
             color: #4CAF50;
+            font-size: clamp(15px, 3vw, 18px);
+            margin-bottom: 8px;
         }
         .prediction {
-            font-size: 24px;
+            font-size: clamp(18px, 4vw, 24px);
             font-weight: bold;
             color: #e74c3c;
+            margin: 8px 0;
         }
         table {
             border-collapse: collapse;
-            margin: 15px 0;
+            margin: 10px 0;
             width: 100%;
+            font-size: clamp(10px, 2vw, 13px);
         }
         th, td {
             border: 1px solid #ddd;
-            padding: 8px 12px;
+            padding: 6px 8px;
             text-align: center;
         }
         th {
@@ -91,48 +131,64 @@
         }
         .chart-container {
             position: relative;
-            margin-top: 20px;
+            margin-top: 15px;
+            width: 100%;
         }
         canvas {
             border: 1px solid #ddd;
             border-radius: 8px;
             width: 100%;
-            max-width: 850px;
+            height: auto;
             touch-action: manipulation;
         }
         .tooltip {
             position: absolute;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             color: white;
             padding: 6px 10px;
             border-radius: 4px;
-            font-size: 13px;
+            font-size: clamp(11px, 2vw, 13px);
             pointer-events: none;
             display: none;
             white-space: nowrap;
             z-index: 10;
+            max-width: 90vw;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .formula {
-            font-size: 18px;
+            font-size: clamp(14px, 3vw, 18px);
             font-weight: bold;
             color: #333;
-            margin: 10px 0;
+            margin: 8px 0;
         }
         .main-btn {
             background: #4CAF50;
             color: white;
             border: none;
-            padding: 12px 30px;
-            font-size: 16px;
+            padding: 10px 25px;
+            font-size: clamp(14px, 2.5vw, 16px);
             border-radius: 5px;
             cursor: pointer;
+            width: 100%;
+            max-width: 300px;
+            transition: background 0.2s;
         }
         .main-btn:hover {
             background: #45a049;
         }
+        .main-btn:active {
+            transform: scale(0.97);
+        }
+        .system-eq {
+            font-size: clamp(12px, 2.2vw, 14px);
+            margin: 5px 0;
+        }
     </style>
 </head>
 <body>
+
+<div class="container">
 
     <h1>Калькулятор прогноза продаж</h1>
 
@@ -144,21 +200,25 @@
 
     <div class="input-area">
         <h3>Введите данные:</h3>
-        <textarea id="dataInput">2021, 110
+        <textarea id="dataInput" placeholder="2021, 110
+2022, 122
+2023, 131
+2024, 145
+2025, 152">2021, 110
 2022, 122
 2023, 131
 2024, 145
 2025, 152</textarea>
-        <br><br>
-        <label>Год для прогноза: <input type="number" id="predictYear" value="2026" min="2000" max="2100"></label>
-        <br><br>
+        <div class="row">
+            <label for="predictYear">Год для прогноза:</label>
+            <input type="number" id="predictYear" value="2026" min="2000" max="2100">
+        </div>
         <div class="tabs">
             <button class="tab active" onclick="setType('linear')">Линейный</button>
-            <button class="tab" onclick="setType('quadratic')">Квадратичный</button>
-            <button class="tab" onclick="setType('exponential')">Экспоненциальный</button>
-            <button class="tab" onclick="setType('logarithmic')">Логарифмический</button>
+            <button class="tab" onclick="setType('quadratic')">Парабола</button>
+            <button class="tab" onclick="setType('exponential')">Экспонента</button>
+            <button class="tab" onclick="setType('logarithmic')">Логарифм</button>
         </div>
-        <br>
         <button class="main-btn" onclick="calculate()">Рассчитать</button>
     </div>
 
@@ -169,423 +229,430 @@
         <p class="prediction" id="prediction"></p>
         <div id="resultContent"></div>
         <div class="chart-container" id="chartContainer">
-            <canvas id="chart" width="850" height="400"></canvas>
+            <canvas id="chart"></canvas>
             <div class="tooltip" id="tooltip"></div>
         </div>
     </div>
 
-    <script>
-        let currentType = 'linear';
+</div>
 
-        function setType(type) {
-            currentType = type;
-            let tabs = document.querySelectorAll('.tab');
-            tabs.forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
+<script>
+    let currentType = 'linear';
+
+    function setType(type) {
+        currentType = type;
+        let tabs = document.querySelectorAll('.tab');
+        tabs.forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    function calculate() {
+        let input = document.getElementById('dataInput').value.trim();
+        let predictYear = parseInt(document.getElementById('predictYear').value);
+        
+        if (!input) {
+            alert('Введите данные!');
+            return;
         }
 
-        function calculate() {
-            let input = document.getElementById('dataInput').value.trim();
-            let predictYear = parseInt(document.getElementById('predictYear').value);
-            
-            if (!input) {
-                alert('Введите данные!');
-                return;
-            }
+        let lines = input.split('\n');
+        let years = [];
+        let yValues = [];
+        let xValues = [];
 
-            let lines = input.split('\n');
-            let years = [];
-            let yValues = [];
-            let xValues = [];
-
-            for (let i = 0; i < lines.length; i++) {
-                let parts = lines[i].split(',');
-                if (parts.length >= 2) {
-                    let year = parseInt(parts[0].trim());
-                    let y = parseFloat(parts[1].trim());
-                    if (!isNaN(year) && !isNaN(y)) {
-                        years.push(year);
-                        yValues.push(y);
-                        xValues.push(i + 1);
-                    }
+        for (let i = 0; i < lines.length; i++) {
+            let parts = lines[i].split(',');
+            if (parts.length >= 2) {
+                let year = parseInt(parts[0].trim());
+                let y = parseFloat(parts[1].trim());
+                if (!isNaN(year) && !isNaN(y)) {
+                    years.push(year);
+                    yValues.push(y);
+                    xValues.push(i + 1);
                 }
             }
-
-            if (years.length < 3) {
-                alert('Нужно минимум 3 точки данных!');
-                return;
-            }
-
-            let n = years.length;
-            let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
-
-            for (let i = 0; i < n; i++) {
-                sumX += xValues[i];
-                sumY += yValues[i];
-                sumXY += xValues[i] * yValues[i];
-                sumX2 += xValues[i] * xValues[i];
-            }
-
-            let resultDiv = document.getElementById('resultContent');
-            resultDiv.innerHTML = '';
-
-            let table = '<table><tr><th>Год</th><th>X (номер)</th><th>Y (продажи)</th><th>X2</th><th>X*Y</th></tr>';
-            for (let i = 0; i < n; i++) {
-                table += '<tr><td>' + years[i] + '</td><td>' + xValues[i] + '</td><td>' + yValues[i] + '</td><td>' + (xValues[i]*xValues[i]) + '</td><td>' + (xValues[i]*yValues[i]) + '</td></tr>';
-            }
-            table += '<tr style="font-weight:bold; background:#f0f0f0;"><td>Суммы</td><td>' + sumX + '</td><td>' + sumY + '</td><td>' + sumX2 + '</td><td>' + sumXY + '</td></tr>';
-            table += '</table>';
-            resultDiv.innerHTML += table;
-
-            let predictX = years[years.length - 1] - years[0] + 2;
-            let prediction, formulaText, trendName;
-
-            if (currentType === 'linear') {
-                let k = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
-                let b = (sumY - k * sumX) / n;
-                k = Math.round(k * 100) / 100;
-                b = Math.round(b * 100) / 100;
-                prediction = Math.round((k * predictX + b) * 10) / 10;
-                formulaText = 'y = ' + b + ' + ' + k + 'x';
-                trendName = 'Линейный тренд';
-                resultDiv.innerHTML += '<p>Система уравнений: <strong>' + n + 'b + ' + sumX + 'k = ' + sumY + '</strong> и <strong>' + sumX + 'b + ' + sumX2 + 'k = ' + sumXY + '</strong></p>';
-            } else if (currentType === 'quadratic') {
-                let sumX3 = 0, sumX4 = 0, sumX2Y = 0;
-                for (let i = 0; i < n; i++) {
-                    sumX3 += Math.pow(xValues[i], 3);
-                    sumX4 += Math.pow(xValues[i], 4);
-                    sumX2Y += xValues[i] * xValues[i] * yValues[i];
-                }
-                let det = n * (sumX2 * sumX4 - sumX3 * sumX3) - sumX * (sumX * sumX4 - sumX2 * sumX3) + sumX2 * (sumX * sumX3 - sumX2 * sumX2);
-                let detA = sumY * (sumX2 * sumX4 - sumX3 * sumX3) - sumX * (sumXY * sumX4 - sumX2Y * sumX3) + sumX2 * (sumXY * sumX3 - sumX2Y * sumX2);
-                let detB = n * (sumXY * sumX4 - sumX2Y * sumX3) - sumY * (sumX * sumX4 - sumX2 * sumX3) + sumX2 * (sumX * sumX2Y - sumXY * sumX2);
-                let detC = n * (sumX2 * sumX2Y - sumX3 * sumXY) - sumX * (sumX * sumX2Y - sumX2 * sumXY) + sumY * (sumX * sumX3 - sumX2 * sumX2);
-                let a = detA / det;
-                let b = detB / det;
-                let c = detC / det;
-                a = Math.round(a * 100) / 100;
-                b = Math.round(b * 100) / 100;
-                c = Math.round(c * 100) / 100;
-                prediction = Math.round((a * predictX * predictX + b * predictX + c) * 10) / 10;
-                formulaText = 'y = ' + a + 'x2 + ' + b + 'x + ' + c;
-                trendName = 'Квадратичный тренд (парабола)';
-            } else if (currentType === 'exponential') {
-                let lnY = yValues.map(function(y) { return Math.log(y); });
-                let sumLnY = 0, sumXLnY = 0;
-                for (let i = 0; i < n; i++) {
-                    sumLnY += lnY[i];
-                    sumXLnY += xValues[i] * lnY[i];
-                }
-                let k = (n * sumXLnY - sumX * sumLnY) / (n * sumX2 - sumX * sumX);
-                let lnB = (sumLnY - k * sumX) / n;
-                let A = Math.exp(lnB);
-                let B = Math.exp(k);
-                A = Math.round(A * 100) / 100;
-                B = Math.round(B * 10000) / 10000;
-                prediction = Math.round((A * Math.pow(B, predictX)) * 10) / 10;
-                formulaText = 'y = ' + A + ' * ' + B + '^x';
-                trendName = 'Экспоненциальный тренд';
-            } else if (currentType === 'logarithmic') {
-                let lnX = xValues.map(function(x) { return Math.log(x); });
-                let sumLnX = 0, sumLnX2 = 0, sumYLnX = 0;
-                for (let i = 0; i < n; i++) {
-                    sumLnX += lnX[i];
-                    sumLnX2 += lnX[i] * lnX[i];
-                    sumYLnX += yValues[i] * lnX[i];
-                }
-                let k = (n * sumYLnX - sumY * sumLnX) / (n * sumLnX2 - sumLnX * sumLnX);
-                let b = (sumY - k * sumLnX) / n;
-                k = Math.round(k * 100) / 100;
-                b = Math.round(b * 100) / 100;
-                prediction = Math.round((k * Math.log(predictX) + b) * 10) / 10;
-                formulaText = 'y = ' + b + ' + ' + k + ' * ln(x)';
-                trendName = 'Логарифмический тренд';
-            }
-
-            document.getElementById('trendType').innerHTML = '<strong>Тип тренда:</strong> ' + trendName;
-            document.getElementById('formula').innerHTML = 'Уравнение: ' + formulaText;
-            document.getElementById('prediction').innerHTML = 'Прогноз на ' + predictYear + ' год: ' + prediction + ' тыс. шт.';
-            document.getElementById('result').style.display = 'block';
-
-            drawChart(xValues, yValues, currentType, predictX, prediction, years);
         }
 
-        function drawChart(xVals, yVals, type, predX, predY, years) {
-            let canvas = document.getElementById('chart');
-            let ctx = canvas.getContext('2d');
-            let tooltip = document.getElementById('tooltip');
-            
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            tooltip.style.display = 'none';
-            
-            let padding = 80;
-            let w = canvas.width - padding * 2;
-            let h = canvas.height - padding * 2;
-            
-            let allX = xVals.concat([predX]);
-            let minX = Math.min.apply(null, allX) - 0.5;
-            let maxX = Math.max.apply(null, allX) + 1.5;
-            
-            let allY = yVals.concat([predY]);
-            let dataMinY = Math.min.apply(null, yVals);
-            let dataMaxY = Math.max.apply(null, yVals);
-            let dataRange = dataMaxY - dataMinY;
-            if (dataRange === 0) dataRange = 10;
-            let minY = dataMinY - dataRange * 0.2;
-            let maxY = dataMaxY + dataRange * 0.5;
-            
-            function toX(val) { return padding + (val - minX) / (maxX - minX) * w; }
-            function toY(val) { return padding + h - (val - minY) / (maxY - minY) * h; }
-            
-            // Оси
-            ctx.strokeStyle = '#333';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(padding, padding);
-            ctx.lineTo(padding, padding + h);
-            ctx.lineTo(padding + w, padding + h);
-            ctx.stroke();
-            
-            // Подписи оси X
-            ctx.fillStyle = '#333';
-            ctx.font = '12px Arial';
-            ctx.textAlign = 'center';
-            for (let i = Math.ceil(minX); i <= Math.floor(maxX); i++) {
-                let x = toX(i);
-                if (x >= padding && x <= padding + w) {
-                    ctx.fillText(i, x, padding + h + 20);
-                }
+        if (years.length < 3) {
+            alert('Нужно минимум 3 точки данных!');
+            return;
+        }
+
+        let n = years.length;
+        let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+
+        for (let i = 0; i < n; i++) {
+            sumX += xValues[i];
+            sumY += yValues[i];
+            sumXY += xValues[i] * yValues[i];
+            sumX2 += xValues[i] * xValues[i];
+        }
+
+        let resultDiv = document.getElementById('resultContent');
+        resultDiv.innerHTML = '';
+
+        let table = '<table><tr><th>Год</th><th>X</th><th>Y</th><th>X²</th><th>X·Y</th></tr>';
+        for (let i = 0; i < n; i++) {
+            table += '<tr><td>' + years[i] + '</td><td>' + xValues[i] + '</td><td>' + yValues[i] + '</td><td>' + (xValues[i]*xValues[i]) + '</td><td>' + (xValues[i]*yValues[i]) + '</td></tr>';
+        }
+        table += '<tr style="font-weight:bold; background:#f0f0f0;"><td>Суммы</td><td>' + sumX + '</td><td>' + sumY + '</td><td>' + sumX2 + '</td><td>' + sumXY + '</td></tr>';
+        table += '</table>';
+        resultDiv.innerHTML += table;
+
+        let predictX = years[years.length - 1] - years[0] + 2;
+        let prediction, formulaText, trendName;
+
+        if (currentType === 'linear') {
+            let k = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+            let b = (sumY - k * sumX) / n;
+            k = Math.round(k * 100) / 100;
+            b = Math.round(b * 100) / 100;
+            prediction = Math.round((k * predictX + b) * 10) / 10;
+            formulaText = 'y = ' + b + ' + ' + k + 'x';
+            trendName = 'Линейный тренд';
+            resultDiv.innerHTML += '<p class="system-eq">Система: <strong>' + n + 'b + ' + sumX + 'k = ' + sumY + '</strong>, <strong>' + sumX + 'b + ' + sumX2 + 'k = ' + sumXY + '</strong></p>';
+        } else if (currentType === 'quadratic') {
+            let sumX3 = 0, sumX4 = 0, sumX2Y = 0;
+            for (let i = 0; i < n; i++) {
+                sumX3 += Math.pow(xValues[i], 3);
+                sumX4 += Math.pow(xValues[i], 4);
+                sumX2Y += xValues[i] * xValues[i] * yValues[i];
             }
-            
-            // Подписи оси Y
-            ctx.textAlign = 'right';
-            let ySteps = 5;
-            let yStep = (maxY - minY) / ySteps;
-            for (let i = 0; i <= ySteps; i++) {
-                let val = Math.round(minY + yStep * i);
-                let y = toY(val);
-                if (y >= padding && y <= padding + h) {
-                    ctx.fillText(val, padding - 10, y + 4);
-                }
+            let det = n * (sumX2 * sumX4 - sumX3 * sumX3) - sumX * (sumX * sumX4 - sumX2 * sumX3) + sumX2 * (sumX * sumX3 - sumX2 * sumX2);
+            let detA = sumY * (sumX2 * sumX4 - sumX3 * sumX3) - sumX * (sumXY * sumX4 - sumX2Y * sumX3) + sumX2 * (sumXY * sumX3 - sumX2Y * sumX2);
+            let detB = n * (sumXY * sumX4 - sumX2Y * sumX3) - sumY * (sumX * sumX4 - sumX2 * sumX3) + sumX2 * (sumX * sumX2Y - sumXY * sumX2);
+            let detC = n * (sumX2 * sumX2Y - sumX3 * sumXY) - sumX * (sumX * sumX2Y - sumX2 * sumXY) + sumY * (sumX * sumX3 - sumX2 * sumX2);
+            let a = detA / det;
+            let b = detB / det;
+            let c = detC / det;
+            a = Math.round(a * 100) / 100;
+            b = Math.round(b * 100) / 100;
+            c = Math.round(c * 100) / 100;
+            prediction = Math.round((a * predictX * predictX + b * predictX + c) * 10) / 10;
+            formulaText = 'y = ' + a + 'x² + ' + b + 'x + ' + c;
+            trendName = 'Квадратичный тренд (парабола)';
+        } else if (currentType === 'exponential') {
+            let lnY = yValues.map(function(y) { return Math.log(y); });
+            let sumLnY = 0, sumXLnY = 0;
+            for (let i = 0; i < n; i++) {
+                sumLnY += lnY[i];
+                sumXLnY += xValues[i] * lnY[i];
             }
-            
-            // Названия осей
-            ctx.fillStyle = '#4CAF50';
-            ctx.font = '14px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('Год (X)', padding + w/2, padding + h + 45);
-            ctx.save();
-            ctx.translate(15, padding + h/2);
-            ctx.rotate(-Math.PI/2);
-            ctx.fillText('Продажи, тыс. шт. (Y)', 0, 0);
-            ctx.restore();
-            
-            // Точки данных
-            let dataPoints = [];
-            for (let i = 0; i < xVals.length; i++) {
-                let cx = toX(xVals[i]);
-                let cy = toY(yVals[i]);
-                dataPoints.push({x: cx, y: cy, year: years[i], value: yVals[i]});
-                ctx.fillStyle = '#e74c3c';
-                ctx.beginPath();
-                ctx.arc(cx, cy, 5, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#333';
-                ctx.font = '11px Arial';
-                ctx.fillText(years[i], cx, cy - 12);
+            let k = (n * sumXLnY - sumX * sumLnY) / (n * sumX2 - sumX * sumX);
+            let lnB = (sumLnY - k * sumX) / n;
+            let A = Math.exp(lnB);
+            let B = Math.exp(k);
+            A = Math.round(A * 100) / 100;
+            B = Math.round(B * 10000) / 10000;
+            prediction = Math.round((A * Math.pow(B, predictX)) * 10) / 10;
+            formulaText = 'y = ' + A + ' · ' + B + 'ˣ';
+            trendName = 'Экспоненциальный тренд';
+        } else if (currentType === 'logarithmic') {
+            let lnX = xValues.map(function(x) { return Math.log(x); });
+            let sumLnX = 0, sumLnX2 = 0, sumYLnX = 0;
+            for (let i = 0; i < n; i++) {
+                sumLnX += lnX[i];
+                sumLnX2 += lnX[i] * lnX[i];
+                sumYLnX += yValues[i] * lnX[i];
             }
-            
-            // Точки тренда
-            let trendPoints = [];
-            
-            // Линия тренда
-            ctx.strokeStyle = '#4CAF50';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            let firstPoint = true;
-            
-            if (type === 'linear') {
-                let n = xVals.length;
-                let sumX = 0, sumY2 = 0, sumXY = 0, sumX2 = 0;
-                for (let i = 0; i < n; i++) {
-                    sumX += xVals[i]; sumY2 += yVals[i];
-                    sumXY += xVals[i]*yVals[i]; sumX2 += xVals[i]*xVals[i];
-                }
-                let k = (n*sumXY - sumX*sumY2)/(n*sumX2 - sumX*sumX);
-                let b = (sumY2 - k*sumX)/n;
-                for (let x = minX; x <= maxX; x += 0.1) {
-                    let y = k*x + b;
-                    let cx = toX(x), cy = toY(y);
-                    trendPoints.push({x: cx, y: cy, xVal: Math.round(x*10)/10, yVal: Math.round(y*10)/10});
-                    if (firstPoint) { ctx.moveTo(cx, cy); firstPoint = false; }
-                    else ctx.lineTo(cx, cy);
-                }
-            } else if (type === 'quadratic') {
-                let n = xVals.length;
-                let sumX = 0, sumY2 = 0, sumXY = 0, sumX2 = 0, sumX3 = 0, sumX4 = 0, sumX2Y = 0;
-                for (let i = 0; i < n; i++) {
-                    sumX += xVals[i]; sumY2 += yVals[i];
-                    sumXY += xVals[i]*yVals[i]; sumX2 += xVals[i]*xVals[i];
-                    sumX3 += Math.pow(xVals[i], 3); sumX4 += Math.pow(xVals[i], 4);
-                    sumX2Y += xVals[i]*xVals[i]*yVals[i];
-                }
-                let det = n*(sumX2*sumX4 - sumX3*sumX3) - sumX*(sumX*sumX4 - sumX2*sumX3) + sumX2*(sumX*sumX3 - sumX2*sumX2);
-                let detA = sumY2*(sumX2*sumX4 - sumX3*sumX3) - sumX*(sumXY*sumX4 - sumX2Y*sumX3) + sumX2*(sumXY*sumX3 - sumX2Y*sumX2);
-                let detB = n*(sumXY*sumX4 - sumX2Y*sumX3) - sumY2*(sumX*sumX4 - sumX2*sumX3) + sumX2*(sumX*sumX2Y - sumXY*sumX2);
-                let detC = n*(sumX2*sumX2Y - sumX3*sumXY) - sumX*(sumX*sumX2Y - sumX2*sumXY) + sumY2*(sumX*sumX3 - sumX2*sumX2);
-                let a = detA/det, b = detB/det, c = detC/det;
-                for (let x = minX; x <= maxX; x += 0.1) {
-                    let y = a*x*x + b*x + c;
-                    let cx = toX(x), cy = toY(y);
-                    trendPoints.push({x: cx, y: cy, xVal: Math.round(x*10)/10, yVal: Math.round(y*10)/10});
-                    if (firstPoint) { ctx.moveTo(cx, cy); firstPoint = false; }
-                    else ctx.lineTo(cx, cy);
-                }
-            } else if (type === 'exponential') {
-                let n = xVals.length;
-                let sumX = 0, sumLnY = 0, sumXLnY = 0, sumX2 = 0;
-                let lnY = yVals.map(function(y) { return Math.log(y); });
-                for (let i = 0; i < n; i++) {
-                    sumX += xVals[i]; sumLnY += lnY[i];
-                    sumXLnY += xVals[i]*lnY[i]; sumX2 += xVals[i]*xVals[i];
-                }
-                let k = (n*sumXLnY - sumX*sumLnY)/(n*sumX2 - sumX*sumX);
-                let lnB = (sumLnY - k*sumX)/n;
-                let A = Math.exp(lnB), B = Math.exp(k);
-                for (let x = minX; x <= maxX; x += 0.1) {
-                    let y = A * Math.pow(B, x);
-                    let cx = toX(x), cy = toY(y);
-                    trendPoints.push({x: cx, y: cy, xVal: Math.round(x*10)/10, yVal: Math.round(y*10)/10});
-                    if (firstPoint) { ctx.moveTo(cx, cy); firstPoint = false; }
-                    else ctx.lineTo(cx, cy);
-                }
-            } else if (type === 'logarithmic') {
-                let n = xVals.length;
-                let sumLnX = 0, sumY2 = 0, sumYLnX = 0, sumLnX2 = 0;
-                let lnX = xVals.map(function(x) { return Math.log(x); });
-                for (let i = 0; i < n; i++) {
-                    sumLnX += lnX[i]; sumY2 += yVals[i];
-                    sumYLnX += yVals[i]*lnX[i]; sumLnX2 += lnX[i]*lnX[i];
-                }
-                let k = (n*sumYLnX - sumY2*sumLnX)/(n*sumLnX2 - sumLnX*sumLnX);
-                let b = (sumY2 - k*sumLnX)/n;
-                for (let x = 0.1; x <= maxX; x += 0.1) {
-                    if (x < 0.01) continue;
-                    let y = k*Math.log(x) + b;
-                    let cx = toX(x), cy = toY(y);
-                    trendPoints.push({x: cx, y: cy, xVal: Math.round(x*10)/10, yVal: Math.round(y*10)/10});
-                    if (firstPoint) { ctx.moveTo(cx, cy); firstPoint = false; }
-                    else ctx.lineTo(cx, cy);
-                }
+            let k = (n * sumYLnX - sumY * sumLnX) / (n * sumLnX2 - sumLnX * sumLnX);
+            let b = (sumY - k * sumLnX) / n;
+            k = Math.round(k * 100) / 100;
+            b = Math.round(b * 100) / 100;
+            prediction = Math.round((k * Math.log(predictX) + b) * 10) / 10;
+            formulaText = 'y = ' + b + ' + ' + k + '·ln(x)';
+            trendName = 'Логарифмический тренд';
+        }
+
+        document.getElementById('trendType').innerHTML = '<strong>Тип тренда:</strong> ' + trendName;
+        document.getElementById('formula').innerHTML = 'Уравнение: ' + formulaText;
+        document.getElementById('prediction').innerHTML = 'Прогноз на ' + predictYear + ' год: ' + prediction + ' тыс. шт.';
+        document.getElementById('result').style.display = 'block';
+
+        drawChart(xValues, yValues, currentType, predictX, prediction, years);
+    }
+
+    function drawChart(xVals, yVals, type, predX, predY, years) {
+        let canvas = document.getElementById('chart');
+        let container = document.getElementById('chartContainer');
+        let tooltip = document.getElementById('tooltip');
+        
+        // Адаптивный размер canvas
+        let containerWidth = container.clientWidth;
+        let size = Math.min(containerWidth, 850);
+        canvas.width = size;
+        canvas.height = size * 0.47;
+        if (canvas.height < 250) canvas.height = 250;
+        
+        let ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        tooltip.style.display = 'none';
+        
+        let padding = canvas.height * 0.2;
+        if (padding < 50) padding = 50;
+        let w = canvas.width - padding * 2;
+        let h = canvas.height - padding * 2;
+        
+        let allX = xVals.concat([predX]);
+        let minX = Math.min.apply(null, allX) - 0.5;
+        let maxX = Math.max.apply(null, allX) + 1.5;
+        
+        let allY = yVals.concat([predY]);
+        let dataMinY = Math.min.apply(null, yVals);
+        let dataMaxY = Math.max.apply(null, yVals);
+        let dataRange = dataMaxY - dataMinY;
+        if (dataRange === 0) dataRange = 10;
+        let minY = dataMinY - dataRange * 0.2;
+        let maxY = dataMaxY + dataRange * 0.5;
+        
+        function toX(val) { return padding + (val - minX) / (maxX - minX) * w; }
+        function toY(val) { return padding + h - (val - minY) / (maxY - minY) * h; }
+        
+        // Оси
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(padding, padding);
+        ctx.lineTo(padding, padding + h);
+        ctx.lineTo(padding + w, padding + h);
+        ctx.stroke();
+        
+        // Подписи оси X
+        let fontSize = Math.max(9, canvas.width / 70);
+        ctx.fillStyle = '#333';
+        ctx.font = fontSize + 'px Arial';
+        ctx.textAlign = 'center';
+        for (let i = Math.ceil(minX); i <= Math.floor(maxX); i++) {
+            let x = toX(i);
+            if (x >= padding && x <= padding + w) {
+                ctx.fillText(i, x, padding + h + fontSize + 8);
             }
-            ctx.stroke();
-            
-            // Прогнозная точка
-            let px = toX(predX);
-            let py = toY(predY);
+        }
+        
+        // Подписи оси Y
+        ctx.textAlign = 'right';
+        let ySteps = 5;
+        let yStep = (maxY - minY) / ySteps;
+        for (let i = 0; i <= ySteps; i++) {
+            let val = Math.round(minY + yStep * i);
+            let y = toY(val);
+            if (y >= padding && y <= padding + h) {
+                ctx.fillText(val, padding - 8, y + fontSize/3);
+            }
+        }
+        
+        // Названия осей
+        ctx.fillStyle = '#4CAF50';
+        let titleFont = Math.max(10, fontSize + 2);
+        ctx.font = titleFont + 'px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Год (X)', padding + w/2, canvas.height - 5);
+        ctx.save();
+        ctx.translate(10, padding + h/2);
+        ctx.rotate(-Math.PI/2);
+        ctx.fillText('Продажи, тыс. шт. (Y)', 0, 0);
+        ctx.restore();
+        
+        // Точки данных
+        let dataPoints = [];
+        let pointRadius = Math.max(3, canvas.width / 170);
+        for (let i = 0; i < xVals.length; i++) {
+            let cx = toX(xVals[i]);
+            let cy = toY(yVals[i]);
+            dataPoints.push({x: cx, y: cy, year: years[i], value: yVals[i]});
             ctx.fillStyle = '#e74c3c';
             ctx.beginPath();
-            ctx.arc(px, py, 7, 0, Math.PI*2);
+            ctx.arc(cx, cy, pointRadius, 0, Math.PI * 2);
             ctx.fill();
-            ctx.strokeStyle = '#e74c3c';
-            ctx.lineWidth = 3;
-            ctx.stroke();
             ctx.fillStyle = '#333';
-            ctx.font = 'bold 13px Arial';
-            ctx.fillText('Прогноз: ' + predY, px, py - 18);
-            
-            // Функция поиска ближайшей точки
-            function findClosest(mouseX, mouseY) {
-                let minDist = 25;
-                let closest = null;
-                
-                // Ищем ближайшую точку тренда
-                for (let i = 0; i < trendPoints.length; i++) {
-                    let dx = mouseX - trendPoints[i].x;
-                    let dy = mouseY - trendPoints[i].y;
-                    let dist = Math.sqrt(dx*dx + dy*dy);
-                    if (dist < minDist) {
-                        minDist = dist;
-                        closest = trendPoints[i];
-                    }
-                }
-                
-                // Проверяем точки данных
-                for (let i = 0; i < dataPoints.length; i++) {
-                    let dx = mouseX - dataPoints[i].x;
-                    let dy = mouseY - dataPoints[i].y;
-                    let dist = Math.sqrt(dx*dx + dy*dy);
-                    if (dist < minDist) {
-                        minDist = dist;
-                        closest = {x: dataPoints[i].x, y: dataPoints[i].y, xVal: xVals[i], yVal: yVals[i], isData: true, year: years[i]};
-                    }
-                }
-                
-                return closest;
-            }
-            
-            function showTooltip(closest, eventX, eventY) {
-                if (closest) {
-                    let text;
-                    if (closest.isData) {
-                        text = 'Год: ' + closest.year + ' | Продажи: ' + closest.yVal + ' тыс. шт.';
-                    } else {
-                        text = 'X: ' + closest.xVal + ' | Y: ' + closest.yVal + ' тыс. шт.';
-                    }
-                    tooltip.innerHTML = text;
-                    tooltip.style.display = 'block';
-                    tooltip.style.left = (closest.x + 15) + 'px';
-                    tooltip.style.top = (closest.y - 30) + 'px';
-                } else {
-                    tooltip.style.display = 'none';
-                }
-            }
-            
-            // Поддержка мыши
-            canvas.onmousemove = function(e) {
-                let rect = canvas.getBoundingClientRect();
-                let scaleX = canvas.width / rect.width;
-                let scaleY = canvas.height / rect.height;
-                let mouseX = (e.clientX - rect.left) * scaleX;
-                let mouseY = (e.clientY - rect.top) * scaleY;
-                let closest = findClosest(mouseX, mouseY);
-                showTooltip(closest);
-            };
-            
-            canvas.onmouseleave = function() {
-                tooltip.style.display = 'none';
-            };
-            
-            // Поддержка касания (телефон)
-            canvas.addEventListener('touchstart', function(e) {
-                e.preventDefault();
-                let rect = canvas.getBoundingClientRect();
-                let scaleX = canvas.width / rect.width;
-                let scaleY = canvas.height / rect.height;
-                let mouseX = (e.touches[0].clientX - rect.left) * scaleX;
-                let mouseY = (e.touches[0].clientY - rect.top) * scaleY;
-                let closest = findClosest(mouseX, mouseY);
-                showTooltip(closest, mouseX, mouseY);
-            });
-            
-            canvas.addEventListener('touchmove', function(e) {
-                e.preventDefault();
-                let rect = canvas.getBoundingClientRect();
-                let scaleX = canvas.width / rect.width;
-                let scaleY = canvas.height / rect.height;
-                let mouseX = (e.touches[0].clientX - rect.left) * scaleX;
-                let mouseY = (e.touches[0].clientY - rect.top) * scaleY;
-                let closest = findClosest(mouseX, mouseY);
-                showTooltip(closest, mouseX, mouseY);
-            });
-            
-            canvas.addEventListener('touchend', function() {
-                setTimeout(function() {
-                    tooltip.style.display = 'none';
-                }, 2000);
-            });
+            ctx.font = fontSize + 'px Arial';
+            ctx.fillText(years[i], cx, cy - pointRadius - 6);
         }
-    </script>
+        
+        // Линия тренда
+        let trendPoints = [];
+        ctx.strokeStyle = '#4CAF50';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        let firstPoint = true;
+        
+        let step = (maxX - minX) / 100;
+        if (step > 0.2) step = 0.2;
+        
+        if (type === 'linear') {
+            let n = xVals.length;
+            let sX = 0, sY = 0, sXY = 0, sX2 = 0;
+            for (let i = 0; i < n; i++) {
+                sX += xVals[i]; sY += yVals[i];
+                sXY += xVals[i]*yVals[i]; sX2 += xVals[i]*xVals[i];
+            }
+            let k = (n*sXY - sX*sY)/(n*sX2 - sX*sX);
+            let b = (sY - k*sX)/n;
+            for (let x = minX; x <= maxX; x += step) {
+                let y = k*x + b;
+                let cx = toX(x), cy = toY(y);
+                trendPoints.push({x: cx, y: cy, xVal: Math.round(x*10)/10, yVal: Math.round(y*10)/10});
+                if (firstPoint) { ctx.moveTo(cx, cy); firstPoint = false; }
+                else ctx.lineTo(cx, cy);
+            }
+        } else if (type === 'quadratic') {
+            let n = xVals.length;
+            let sX = 0, sY = 0, sXY = 0, sX2 = 0, sX3 = 0, sX4 = 0, sX2Y = 0;
+            for (let i = 0; i < n; i++) {
+                sX += xVals[i]; sY += yVals[i];
+                sXY += xVals[i]*yVals[i]; sX2 += xVals[i]*xVals[i];
+                sX3 += Math.pow(xVals[i], 3); sX4 += Math.pow(xVals[i], 4);
+                sX2Y += xVals[i]*xVals[i]*yVals[i];
+            }
+            let det = n*(sX2*sX4 - sX3*sX3) - sX*(sX*sX4 - sX2*sX3) + sX2*(sX*sX3 - sX2*sX2);
+            let detA = sY*(sX2*sX4 - sX3*sX3) - sX*(sXY*sX4 - sX2Y*sX3) + sX2*(sXY*sX3 - sX2Y*sX2);
+            let detB = n*(sXY*sX4 - sX2Y*sX3) - sY*(sX*sX4 - sX2*sX3) + sX2*(sX*sX2Y - sXY*sX2);
+            let detC = n*(sX2*sX2Y - sX3*sXY) - sX*(sX*sX2Y - sX2*sXY) + sY*(sX*sX3 - sX2*sX2);
+            let a = detA/det, b = detB/det, c = detC/det;
+            for (let x = minX; x <= maxX; x += step) {
+                let y = a*x*x + b*x + c;
+                let cx = toX(x), cy = toY(y);
+                trendPoints.push({x: cx, y: cy, xVal: Math.round(x*10)/10, yVal: Math.round(y*10)/10});
+                if (firstPoint) { ctx.moveTo(cx, cy); firstPoint = false; }
+                else ctx.lineTo(cx, cy);
+            }
+        } else if (type === 'exponential') {
+            let n = xVals.length;
+            let sX = 0, sLnY = 0, sXLnY = 0, sX2 = 0;
+            let lnY = yVals.map(function(y) { return Math.log(y); });
+            for (let i = 0; i < n; i++) {
+                sX += xVals[i]; sLnY += lnY[i];
+                sXLnY += xVals[i]*lnY[i]; sX2 += xVals[i]*xVals[i];
+            }
+            let k = (n*sXLnY - sX*sLnY)/(n*sX2 - sX*sX);
+            let lnB = (sLnY - k*sX)/n;
+            let A = Math.exp(lnB), B = Math.exp(k);
+            for (let x = minX; x <= maxX; x += step) {
+                let y = A * Math.pow(B, x);
+                let cx = toX(x), cy = toY(y);
+                trendPoints.push({x: cx, y: cy, xVal: Math.round(x*10)/10, yVal: Math.round(y*10)/10});
+                if (firstPoint) { ctx.moveTo(cx, cy); firstPoint = false; }
+                else ctx.lineTo(cx, cy);
+            }
+        } else if (type === 'logarithmic') {
+            let n = xVals.length;
+            let sLnX = 0, sY = 0, sYLnX = 0, sLnX2 = 0;
+            let lnX = xVals.map(function(x) { return Math.log(x); });
+            for (let i = 0; i < n; i++) {
+                sLnX += lnX[i]; sY += yVals[i];
+                sYLnX += yVals[i]*lnX[i]; sLnX2 += lnX[i]*lnX[i];
+            }
+            let k = (n*sYLnX - sY*sLnX)/(n*sLnX2 - sLnX*sLnX);
+            let b = (sY - k*sLnX)/n;
+            for (let x = 0.1; x <= maxX; x += step) {
+                if (x < 0.01) continue;
+                let y = k*Math.log(x) + b;
+                let cx = toX(x), cy = toY(y);
+                trendPoints.push({x: cx, y: cy, xVal: Math.round(x*10)/10, yVal: Math.round(y*10)/10});
+                if (firstPoint) { ctx.moveTo(cx, cy); firstPoint = false; }
+                else ctx.lineTo(cx, cy);
+            }
+        }
+        ctx.stroke();
+        
+        // Прогнозная точка
+        let px = toX(predX);
+        let py = toY(predY);
+        ctx.fillStyle = '#e74c3c';
+        ctx.beginPath();
+        ctx.arc(px, py, pointRadius + 2, 0, Math.PI*2);
+        ctx.fill();
+        ctx.strokeStyle = '#e74c3c';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+        ctx.fillStyle = '#333';
+        ctx.font = 'bold ' + (fontSize + 1) + 'px Arial';
+        ctx.fillText('Прогноз: ' + predY, px, py - pointRadius - 8);
+        
+        // Поиск ближайшей точки
+        function findClosest(mouseX, mouseY) {
+            let minDist = 25;
+            let closest = null;
+            for (let i = 0; i < trendPoints.length; i++) {
+                let dx = mouseX - trendPoints[i].x;
+                let dy = mouseY - trendPoints[i].y;
+                let dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < minDist) {
+                    minDist = dist;
+                    closest = trendPoints[i];
+                }
+            }
+            for (let i = 0; i < dataPoints.length; i++) {
+                let dx = mouseX - dataPoints[i].x;
+                let dy = mouseY - dataPoints[i].y;
+                let dist = Math.sqrt(dx*dx + dy*dy);
+                if (dist < minDist) {
+                    minDist = dist;
+                    closest = {x: dataPoints[i].x, y: dataPoints[i].y, xVal: xVals[i], yVal: yVals[i], isData: true, year: years[i]};
+                }
+            }
+            return closest;
+        }
+        
+        function showTooltip(closest) {
+            if (closest) {
+                let text;
+                if (closest.isData) {
+                    text = 'Год: ' + closest.year + ' | Продажи: ' + closest.yVal + ' тыс. шт.';
+                } else {
+                    text = 'X: ' + closest.xVal + ' | Y: ' + closest.yVal + ' тыс. шт.';
+                }
+                tooltip.innerHTML = text;
+                tooltip.style.display = 'block';
+                let left = closest.x + 15;
+                let top = closest.y - 30;
+                if (left + 150 > canvas.width) left = closest.x - 150;
+                if (top < 0) top = closest.y + 20;
+                tooltip.style.left = left + 'px';
+                tooltip.style.top = top + 'px';
+            } else {
+                tooltip.style.display = 'none';
+            }
+        }
+        
+        function getCoords(e) {
+            let rect = canvas.getBoundingClientRect();
+            let scaleX = canvas.width / rect.width;
+            let scaleY = canvas.height / rect.height;
+            return {
+                x: (e.clientX - rect.left) * scaleX,
+                y: (e.clientY - rect.top) * scaleY
+            };
+        }
+        
+        // Мышь
+        canvas.onmousemove = function(e) {
+            let coords = getCoords(e);
+            let closest = findClosest(coords.x, coords.y);
+            showTooltip(closest);
+        };
+        canvas.onmouseleave = function() {
+            tooltip.style.display = 'none';
+        };
+        
+        // Касание
+        canvas.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            let coords = getCoords(e.touches[0]);
+            let closest = findClosest(coords.x, coords.y);
+            showTooltip(closest);
+        });
+        canvas.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+            let coords = getCoords(e.touches[0]);
+            let closest = findClosest(coords.x, coords.y);
+            showTooltip(closest);
+        });
+        canvas.addEventListener('touchend', function() {
+            setTimeout(function() { tooltip.style.display = 'none'; }, 2000);
+        });
+    }
+</script>
 
 </body>
 </html>
