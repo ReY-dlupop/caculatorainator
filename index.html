@@ -320,25 +320,25 @@
                 sumX2Y += x2 * yValues[i];
             }
             
-            let det = n * (sumX2 * sumX4 - sumX3 * sumX3) 
-                    - sumX * (sumX * sumX4 - sumX2 * sumX3) 
-                    + sumX2 * (sumX * sumX3 - sumX2 * sumX2);
+            let d = n * (sumX2 * sumX4 - sumX3 * sumX3)
+                  - sumX * (sumX * sumX4 - sumX3 * sumX2)
+                  + sumX2 * (sumX * sumX3 - sumX2 * sumX2);
             
-            let detC = sumY * (sumX2 * sumX4 - sumX3 * sumX3) 
-                     - sumX * (sumXY * sumX4 - sumX2Y * sumX3) 
-                     + sumX2 * (sumXY * sumX3 - sumX2Y * sumX2);
+            let dc = sumY * (sumX2 * sumX4 - sumX3 * sumX3)
+                   - sumX * (sumXY * sumX4 - sumX2Y * sumX3)
+                   + sumX2 * (sumXY * sumX3 - sumX2Y * sumX2);
             
-            let detB = n * (sumXY * sumX4 - sumX2Y * sumX3) 
-                     - sumY * (sumX * sumX4 - sumX2 * sumX3) 
-                     + sumX2 * (sumX * sumX2Y - sumXY * sumX2);
+            let db = n * (sumXY * sumX4 - sumX3 * sumX2Y)
+                   - sumY * (sumX * sumX4 - sumX3 * sumX2)
+                   + sumX2 * (sumX * sumX2Y - sumXY * sumX2);
             
-            let detA = n * (sumX2 * sumX2Y - sumX3 * sumXY) 
-                     - sumX * (sumX * sumX2Y - sumX2 * sumXY) 
-                     + sumY * (sumX * sumX3 - sumX2 * sumX2);
+            let da = n * (sumX2 * sumX2Y - sumX3 * sumXY)
+                   - sumX * (sumX * sumX2Y - sumX2 * sumXY)
+                   + sumY * (sumX * sumX3 - sumX2 * sumX2);
             
-            let a = detA / det;
-            let b = detB / det;
-            let c = detC / det;
+            let a = da / d;
+            let b = db / d;
+            let c = dc / d;
             
             a = Math.round(a * 100) / 100;
             b = Math.round(b * 100) / 100;
@@ -520,19 +520,19 @@
                 sX3 += x2 * xVals[i]; sX4 += x2 * x2;
                 sX2Y += x2 * yVals[i];
             }
-            let det = n * (sX2 * sX4 - sX3 * sX3) 
-                    - sX * (sX * sX4 - sX2 * sX3) 
-                    + sX2 * (sX * sX3 - sX2 * sX2);
-            let detC = sY * (sX2 * sX4 - sX3 * sX3) 
-                     - sX * (sXY * sX4 - sX2Y * sX3) 
-                     + sX2 * (sXY * sX3 - sX2Y * sX2);
-            let detB = n * (sXY * sX4 - sX2Y * sX3) 
-                     - sY * (sX * sX4 - sX2 * sX3) 
-                     + sX2 * (sX * sX2Y - sXY * sX2);
-            let detA = n * (sX2 * sX2Y - sX3 * sXY) 
-                     - sX * (sX * sX2Y - sX2 * sXY) 
-                     + sY * (sX * sX3 - sX2 * sX2);
-            let a = detA / det, b = detB / det, c = detC / det;
+            let d = n * (sX2 * sX4 - sX3 * sX3)
+                  - sX * (sX * sX4 - sX3 * sX2)
+                  + sX2 * (sX * sX3 - sX2 * sX2);
+            let dc = sY * (sX2 * sX4 - sX3 * sX3)
+                   - sX * (sXY * sX4 - sX2Y * sX3)
+                   + sX2 * (sXY * sX3 - sX2Y * sX2);
+            let db = n * (sXY * sX4 - sX3 * sX2Y)
+                   - sY * (sX * sX4 - sX3 * sX2)
+                   + sX2 * (sX * sX2Y - sXY * sX2);
+            let da = n * (sX2 * sX2Y - sX3 * sXY)
+                   - sX * (sX * sX2Y - sX2 * sXY)
+                   + sY * (sX * sX3 - sX2 * sX2);
+            let a = da / d, b = db / d, c = dc / d;
             for (let x = minX; x <= maxX; x += step) {
                 let y = a * x * x + b * x + c;
                 let cx = toX(x), cy = toY(y);
