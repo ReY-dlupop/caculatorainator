@@ -302,12 +302,16 @@
             let h = canvas.height - padding * 2;
             
             let allX = xVals.concat([predX]);
-            let minX = Math.min.apply(null, allX) - 0.5;
-            let maxX = Math.max.apply(null, allX) + 0.5;
+            let minX = Math.min.apply(null, allX) - 1;
+            let maxX = Math.max.apply(null, allX) + 1;
             
             let allY = yVals.concat([predY]);
-            let minY = Math.min.apply(null, allY) - 20;
-            let maxY = Math.max.apply(null, allY) + 20;
+            let minY = Math.min.apply(null, allY);
+            let maxY = Math.max.apply(null, allY);
+            let range = maxY - minY;
+            if (range === 0) range = 10;
+            minY = minY - range * 0.3;
+            maxY = maxY + range * 0.3;
             
             function toX(val) { return padding + (val - minX) / (maxX - minX) * w; }
             function toY(val) { return padding + h - (val - minY) / (maxY - minY) * h; }
@@ -325,12 +329,16 @@
             ctx.textAlign = 'center';
             for (let i = Math.ceil(minX); i <= maxX; i++) {
                 let x = toX(i);
-                ctx.fillText(i, x, padding + h + 20);
+                if (x >= padding && x <= padding + w) {
+                    ctx.fillText(i, x, padding + h + 20);
+                }
             }
             ctx.textAlign = 'right';
             for (let i = Math.floor(minY / 10) * 10; i <= maxY; i += 20) {
                 let y = toY(i);
-                ctx.fillText(i, padding - 10, y + 4);
+                if (y >= padding && y <= padding + h) {
+                    ctx.fillText(i, padding - 10, y + 4);
+                }
             }
             ctx.fillStyle = '#4CAF50';
             ctx.font = '14px Arial';
@@ -345,18 +353,21 @@
             for (let i = 0; i < xVals.length; i++) {
                 let cx = toX(xVals[i]);
                 let cy = toY(yVals[i]);
-                ctx.fillStyle = '#e74c3c';
-                ctx.beginPath();
-                ctx.arc(cx, cy, 5, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#333';
-                ctx.font = '11px Arial';
-                ctx.fillText(years[i], cx, cy - 12);
+                if (cx >= padding && cx <= padding + w && cy >= padding && cy <= padding + h) {
+                    ctx.fillStyle = '#e74c3c';
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#333';
+                    ctx.font = '11px Arial';
+                    ctx.fillText(years[i], cx, cy - 12);
+                }
             }
             
             ctx.strokeStyle = '#4CAF50';
             ctx.lineWidth = 2;
             ctx.beginPath();
+            let firstPoint = true;
             
             if (type === 'linear') {
                 let n = xVals.length;
@@ -367,9 +378,12 @@
                 }
                 let k = (n*sumXY - sumX*sumY2)/(n*sumX2 - sumX*sumX);
                 let b = (sumY2 - k*sumX)/n;
-                let y1 = k*minX + b, y2 = k*maxX + b;
-                ctx.moveTo(toX(minX), toY(y1));
-                ctx.lineTo(toX(maxX), toY(y2));
+                for (let x = minX; x <= maxX; x += 0.1) {
+                    let y = k*x + b;
+                    let cx = toX(x), cy = toY(y);
+                    if (firstPoint) { ctx.moveTo(cx, cy); firstPoint = false; }
+                    else ctx.lineTo(cx, cy);
+                }
             } else if (type === 'quadratic') {
                 let n = xVals.length;
                 let sumX = 0, sumY2 = 0, sumXY = 0, sumX2 = 0, sumX3 = 0, sumX4 = 0, sumX2Y = 0;
@@ -386,8 +400,9 @@
                 let a = detA/det, b = detB/det, c = detC/det;
                 for (let x = minX; x <= maxX; x += 0.1) {
                     let y = a*x*x + b*x + c;
-                    if (x === minX) ctx.moveTo(toX(x), toY(y));
-                    else ctx.lineTo(toX(x), toY(y));
+                    let cx = toX(x), cy = toY(y);
+                    if (firstPoint) { ctx.moveTo(cx, cy); firstPoint = false; }
+                    else ctx.lineTo(cx, cy);
                 }
             } else if (type === 'exponential') {
                 let n = xVals.length;
@@ -402,8 +417,9 @@
                 let A = Math.exp(lnB), B = Math.exp(k);
                 for (let x = minX; x <= maxX; x += 0.1) {
                     let y = A * Math.pow(B, x);
-                    if (x === minX) ctx.moveTo(toX(x), toY(y));
-                    else ctx.lineTo(toX(x), toY(y));
+                    let cx = toX(x), cy = toY(y);
+                    if (firstPoint) { ctx.moveTo(cx, cy); firstPoint = false; }
+                    else ctx.lineTo(cx, cy);
                 }
             } else if (type === 'logarithmic') {
                 let n = xVals.length;
@@ -416,25 +432,29 @@
                 let k = (n*sumYLnX - sumY2*sumLnX)/(n*sumLnX2 - sumLnX*sumLnX);
                 let b = (sumY2 - k*sumLnX)/n;
                 for (let x = 0.1; x <= maxX; x += 0.1) {
+                    if (x < 0.01) continue;
                     let y = k*Math.log(x) + b;
-                    if (x === 0.1) ctx.moveTo(toX(x), toY(y));
-                    else ctx.lineTo(toX(x), toY(y));
+                    let cx = toX(x), cy = toY(y);
+                    if (firstPoint) { ctx.moveTo(cx, cy); firstPoint = false; }
+                    else ctx.lineTo(cx, cy);
                 }
             }
             ctx.stroke();
             
             let px = toX(predX);
             let py = toY(predY);
-            ctx.fillStyle = '#e74c3c';
-            ctx.beginPath();
-            ctx.arc(px, py, 7, 0, Math.PI*2);
-            ctx.fill();
-            ctx.strokeStyle = '#e74c3c';
-            ctx.lineWidth = 3;
-            ctx.stroke();
-            ctx.fillStyle = '#333';
-            ctx.font = 'bold 13px Arial';
-            ctx.fillText('Прогноз: ' + predY, px, py - 18);
+            if (px >= padding && px <= padding + w && py >= padding && py <= padding + h) {
+                ctx.fillStyle = '#e74c3c';
+                ctx.beginPath();
+                ctx.arc(px, py, 7, 0, Math.PI*2);
+                ctx.fill();
+                ctx.strokeStyle = '#e74c3c';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                ctx.fillStyle = '#333';
+                ctx.font = 'bold 13px Arial';
+                ctx.fillText('Прогноз: ' + predY, px, py - 18);
+            }
         }
     </script>
 
