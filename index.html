@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>РљР°Р»СЊРєСѓР»СЏС‚РѕСЂ РїСЂРѕРіРЅРѕР·Р° РїСЂРѕРґР°Р¶</title>
+    <title>Калькулятор прогноза продаж</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -47,6 +47,7 @@
             display: flex;
             gap: 10px;
             margin: 15px 0;
+            flex-wrap: wrap;
         }
         .tab {
             padding: 10px 20px;
@@ -101,41 +102,52 @@
             color: #333;
             margin: 10px 0;
         }
+        .main-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .main-btn:hover {
+            background: #45a049;
+        }
     </style>
 </head>
 <body>
 
-    <h1>РљР°Р»СЊРєСѓР»СЏС‚РѕСЂ РїСЂРѕРіРЅРѕР·Р° РїСЂРѕРґР°Р¶</h1>
+    <h1>Калькулятор прогноза продаж</h1>
 
     <div class="description">
-        <p>Р’РІРµРґРёС‚Рµ РґР°РЅРЅС‹Рµ Рѕ РїСЂРѕРґР°Р¶Р°С… Р·Р° РЅРµСЃРєРѕР»СЊРєРѕ РїРµСЂРёРѕРґРѕРІ. РљР°Р¶РґР°СЏ СЃС‚СЂРѕРєР°: <strong>РіРѕРґ, РєРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРѕРґР°Р¶ (С‚С‹СЃ. С€С‚.)</strong> С‡РµСЂРµР· Р·Р°РїСЏС‚СѓСЋ.</p>
-        <p>РџСЂРёРјРµСЂ:</p>
-        <p>2021, 110<br>2022, 122<br>2023, 131<br>2024, 145<br>2025, 152</p>
-        <p>Р’С‹Р±РµСЂРёС‚Рµ РІРёРґ С‚СЂРµРЅРґР° Рё РЅР°Р¶РјРёС‚Рµ В«Р Р°СЃСЃС‡РёС‚Р°С‚СЊВ».</p>
+        <p>Введите данные о продажах за несколько периодов. Каждая строка: <strong>год, количество продаж (тыс. шт.)</strong> через запятую.</p>
+        <p>Пример: 2021, 110</p>
+        <p>Выберите вид тренда и нажмите «Рассчитать».</p>
     </div>
 
     <div class="input-area">
-        <h3>Р’РІРµРґРёС‚Рµ РґР°РЅРЅС‹Рµ:</h3>
-        <textarea id="dataInput" placeholder="2021, 110
+        <h3>Введите данные:</h3>
+        <textarea id="dataInput">2021, 110
 2022, 122
 2023, 131
 2024, 145
-2025, 152"></textarea>
+2025, 152</textarea>
         <br><br>
-        <label>Р“РѕРґ РґР»СЏ РїСЂРѕРіРЅРѕР·Р°: <input type="number" id="predictYear" value="2026" min="2000" max="2100"></label>
+        <label>Год для прогноза: <input type="number" id="predictYear" value="2026" min="2000" max="2100"></label>
         <br><br>
         <div class="tabs">
-            <button class="tab active" onclick="setType('linear')">Р›РёРЅРµР№РЅС‹Р№</button>
-            <button class="tab" onclick="setType('quadratic')">РљРІР°РґСЂР°С‚РёС‡РЅС‹Р№</button>
-            <button class="tab" onclick="setType('exponential')">Р­РєСЃРїРѕРЅРµРЅС†РёР°Р»СЊРЅС‹Р№</button>
-            <button class="tab" onclick="setType('logarithmic')">Р›РѕРіР°СЂРёС„РјРёС‡РµСЃРєРёР№</button>
+            <button class="tab active" onclick="setType('linear')">Линейный</button>
+            <button class="tab" onclick="setType('quadratic')">Квадратичный</button>
+            <button class="tab" onclick="setType('exponential')">Экспоненциальный</button>
+            <button class="tab" onclick="setType('logarithmic')">Логарифмический</button>
         </div>
         <br>
-        <button onclick="calculate()" style="background: #4CAF50; color: white; border: none; padding: 10px 30px; font-size: 16px; border-radius: 5px; cursor: pointer;">Р Р°СЃСЃС‡РёС‚Р°С‚СЊ</button>
+        <button class="main-btn" onclick="calculate()">Рассчитать</button>
     </div>
 
     <div class="result" id="result">
-        <h3>Р РµР·СѓР»СЊС‚Р°С‚С‹ СЂР°СЃС‡С‘С‚Р°</h3>
+        <h3>Результаты расчёта</h3>
         <p id="trendType"></p>
         <p class="formula" id="formula"></p>
         <p class="prediction" id="prediction"></p>
@@ -158,7 +170,7 @@
             let predictYear = parseInt(document.getElementById('predictYear').value);
             
             if (!input) {
-                alert('Р’РІРµРґРёС‚Рµ РґР°РЅРЅС‹Рµ!');
+                alert('Введите данные!');
                 return;
             }
 
@@ -181,7 +193,7 @@
             }
 
             if (years.length < 3) {
-                alert('РќСѓР¶РЅРѕ РјРёРЅРёРјСѓРј 3 С‚РѕС‡РєРё РґР°РЅРЅС‹С…!');
+                alert('Нужно минимум 3 точки данных!');
                 return;
             }
 
@@ -198,11 +210,11 @@
             let resultDiv = document.getElementById('resultContent');
             resultDiv.innerHTML = '';
 
-            let table = '<table><tr><th>Р“РѕРґ</th><th>X (РЅРѕРјРµСЂ)</th><th>Y (РїСЂРѕРґР°Р¶Рё)</th><th>XВІ</th><th>XВ·Y</th></tr>';
+            let table = '<table><tr><th>Год</th><th>X (номер)</th><th>Y (продажи)</th><th>X2</th><th>X*Y</th></tr>';
             for (let i = 0; i < n; i++) {
-                table += `<tr><td>${years[i]}</td><td>${xValues[i]}</td><td>${yValues[i]}</td><td>${xValues[i]*xValues[i]}</td><td>${xValues[i]*yValues[i]}</td></tr>`;
+                table += '<tr><td>' + years[i] + '</td><td>' + xValues[i] + '</td><td>' + yValues[i] + '</td><td>' + (xValues[i]*xValues[i]) + '</td><td>' + (xValues[i]*yValues[i]) + '</td></tr>';
             }
-            table += `<tr style="font-weight:bold; background:#f0f0f0;"><td>РЎСѓРјРјС‹</td><td>${sumX}</td><td>${sumY}</td><td>${sumX2}</td><td>${sumXY}</td></tr>`;
+            table += '<tr style="font-weight:bold; background:#f0f0f0;"><td>Суммы</td><td>' + sumX + '</td><td>' + sumY + '</td><td>' + sumX2 + '</td><td>' + sumXY + '</td></tr>';
             table += '</table>';
             resultDiv.innerHTML += table;
 
@@ -215,17 +227,16 @@
                 k = Math.round(k * 100) / 100;
                 b = Math.round(b * 100) / 100;
                 prediction = Math.round((k * predictX + b) * 10) / 10;
-                formulaText = `y = ${b} + ${k}x`;
-                trendName = 'Р›РёРЅРµР№РЅС‹Р№ С‚СЂРµРЅРґ';
-                resultDiv.innerHTML += `<p>РЎРёСЃС‚РµРјР° СѓСЂР°РІРЅРµРЅРёР№: <strong>${n}b + ${sumX}k = ${sumY}</strong> Рё <strong>${sumX}b + ${sumX2}k = ${sumXY}</strong></p>`;
+                formulaText = 'y = ' + b + ' + ' + k + 'x';
+                trendName = 'Линейный тренд';
+                resultDiv.innerHTML += '<p>Система уравнений: <strong>' + n + 'b + ' + sumX + 'k = ' + sumY + '</strong> и <strong>' + sumX + 'b + ' + sumX2 + 'k = ' + sumXY + '</strong></p>';
             } else if (currentType === 'quadratic') {
                 let sumX3 = 0, sumX4 = 0, sumX2Y = 0;
                 for (let i = 0; i < n; i++) {
-                    sumX3 += xValues[i] ** 3;
-                    sumX4 += xValues[i] ** 4;
+                    sumX3 += Math.pow(xValues[i], 3);
+                    sumX4 += Math.pow(xValues[i], 4);
                     sumX2Y += xValues[i] * xValues[i] * yValues[i];
                 }
-                // Р РµС€Р°РµРј СЃРёСЃС‚РµРјСѓ С‚СЂС‘С… СѓСЂР°РІРЅРµРЅРёР№ РјРµС‚РѕРґРѕРј РљСЂР°РјРµСЂР°
                 let det = n * (sumX2 * sumX4 - sumX3 * sumX3) - sumX * (sumX * sumX4 - sumX2 * sumX3) + sumX2 * (sumX * sumX3 - sumX2 * sumX2);
                 let detA = sumY * (sumX2 * sumX4 - sumX3 * sumX3) - sumX * (sumXY * sumX4 - sumX2Y * sumX3) + sumX2 * (sumXY * sumX3 - sumX2Y * sumX2);
                 let detB = n * (sumXY * sumX4 - sumX2Y * sumX3) - sumY * (sumX * sumX4 - sumX2 * sumX3) + sumX2 * (sumX * sumX2Y - sumXY * sumX2);
@@ -237,10 +248,10 @@
                 b = Math.round(b * 100) / 100;
                 c = Math.round(c * 100) / 100;
                 prediction = Math.round((a * predictX * predictX + b * predictX + c) * 10) / 10;
-                formulaText = `y = ${a}xВІ + ${b}x + ${c}`;
-                trendName = 'РљРІР°РґСЂР°С‚РёС‡РЅС‹Р№ С‚СЂРµРЅРґ (РїР°СЂР°Р±РѕР»Р°)';
+                formulaText = 'y = ' + a + 'x2 + ' + b + 'x + ' + c;
+                trendName = 'Квадратичный тренд (парабола)';
             } else if (currentType === 'exponential') {
-                let lnY = yValues.map(y => Math.log(y));
+                let lnY = yValues.map(function(y) { return Math.log(y); });
                 let sumLnY = 0, sumXLnY = 0;
                 for (let i = 0; i < n; i++) {
                     sumLnY += lnY[i];
@@ -248,15 +259,15 @@
                 }
                 let k = (n * sumXLnY - sumX * sumLnY) / (n * sumX2 - sumX * sumX);
                 let lnB = (sumLnY - k * sumX) / n;
-                let a = Math.exp(lnB);
-                let b = Math.exp(k);
-                a = Math.round(a * 100) / 100;
-                b = Math.round(b * 10000) / 10000;
-                prediction = Math.round((a * Math.pow(b, predictX)) * 10) / 10;
-                formulaText = `y = ${a} В· ${b}ЛЈ`;
-                trendName = 'Р­РєСЃРїРѕРЅРµРЅС†РёР°Р»СЊРЅС‹Р№ С‚СЂРµРЅРґ';
+                let A = Math.exp(lnB);
+                let B = Math.exp(k);
+                A = Math.round(A * 100) / 100;
+                B = Math.round(B * 10000) / 10000;
+                prediction = Math.round((A * Math.pow(B, predictX)) * 10) / 10;
+                formulaText = 'y = ' + A + ' * ' + B + '^x';
+                trendName = 'Экспоненциальный тренд';
             } else if (currentType === 'logarithmic') {
-                let lnX = xValues.map(x => Math.log(x));
+                let lnX = xValues.map(function(x) { return Math.log(x); });
                 let sumLnX = 0, sumLnX2 = 0, sumYLnX = 0;
                 for (let i = 0; i < n; i++) {
                     sumLnX += lnX[i];
@@ -268,13 +279,13 @@
                 k = Math.round(k * 100) / 100;
                 b = Math.round(b * 100) / 100;
                 prediction = Math.round((k * Math.log(predictX) + b) * 10) / 10;
-                formulaText = `y = ${b} + ${k}В·ln(x)`;
-                trendName = 'Р›РѕРіР°СЂРёС„РјРёС‡РµСЃРєРёР№ С‚СЂРµРЅРґ';
+                formulaText = 'y = ' + b + ' + ' + k + ' * ln(x)';
+                trendName = 'Логарифмический тренд';
             }
 
-            document.getElementById('trendType').innerHTML = `<strong>РўРёРї С‚СЂРµРЅРґР°:</strong> ${trendName}`;
-            document.getElementById('formula').innerHTML = `РЈСЂР°РІРЅРµРЅРёРµ: ${formulaText}`;
-            document.getElementById('prediction').innerHTML = `РџСЂРѕРіРЅРѕР· РЅР° ${predictYear} РіРѕРґ: ${prediction} С‚С‹СЃ. С€С‚.`;
+            document.getElementById('trendType').innerHTML = '<strong>Тип тренда:</strong> ' + trendName;
+            document.getElementById('formula').innerHTML = 'Уравнение: ' + formulaText;
+            document.getElementById('prediction').innerHTML = 'Прогноз на ' + predictYear + ' год: ' + prediction + ' тыс. шт.';
             document.getElementById('result').style.display = 'block';
 
             drawChart(xValues, yValues, currentType, predictX, prediction, years);
@@ -290,18 +301,17 @@
             let w = canvas.width - padding * 2;
             let h = canvas.height - padding * 2;
             
-            let allX = [...xVals, predX];
-            let minX = Math.min(...allX) - 0.5;
-            let maxX = Math.max(...allX) + 0.5;
+            let allX = xVals.concat([predX]);
+            let minX = Math.min.apply(null, allX) - 0.5;
+            let maxX = Math.max.apply(null, allX) + 0.5;
             
-            let allY = [...yVals, predY];
-            let minY = Math.min(...allY) - 20;
-            let maxY = Math.max(...allY) + 20;
+            let allY = yVals.concat([predY]);
+            let minY = Math.min.apply(null, allY) - 20;
+            let maxY = Math.max.apply(null, allY) + 20;
             
             function toX(val) { return padding + (val - minX) / (maxX - minX) * w; }
             function toY(val) { return padding + h - (val - minY) / (maxY - minY) * h; }
             
-            // РћСЃРё
             ctx.strokeStyle = '#333';
             ctx.lineWidth = 2;
             ctx.beginPath();
@@ -310,7 +320,6 @@
             ctx.lineTo(padding + w, padding + h);
             ctx.stroke();
             
-            // РџРѕРґРїРёСЃРё РѕСЃРµР№
             ctx.fillStyle = '#333';
             ctx.font = '12px Arial';
             ctx.textAlign = 'center';
@@ -326,14 +335,13 @@
             ctx.fillStyle = '#4CAF50';
             ctx.font = '14px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('Р“РѕРґ (X)', padding + w/2, padding + h + 45);
+            ctx.fillText('Год (X)', padding + w/2, padding + h + 45);
             ctx.save();
             ctx.translate(15, padding + h/2);
             ctx.rotate(-Math.PI/2);
-            ctx.fillText('РџСЂРѕРґР°Р¶Рё, С‚С‹СЃ. С€С‚. (Y)', 0, 0);
+            ctx.fillText('Продажи, тыс. шт. (Y)', 0, 0);
             ctx.restore();
             
-            // РўРѕС‡РєРё
             for (let i = 0; i < xVals.length; i++) {
                 let cx = toX(xVals[i]);
                 let cy = toY(yVals[i]);
@@ -343,39 +351,38 @@
                 ctx.fill();
                 ctx.fillStyle = '#333';
                 ctx.font = '11px Arial';
-                ctx.fillText(`${years[i]}`, cx, cy - 12);
+                ctx.fillText(years[i], cx, cy - 12);
             }
             
-            // Р›РёРЅРёСЏ С‚СЂРµРЅРґР°
             ctx.strokeStyle = '#4CAF50';
             ctx.lineWidth = 2;
             ctx.beginPath();
             
             if (type === 'linear') {
                 let n = xVals.length;
-                let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+                let sumX = 0, sumY2 = 0, sumXY = 0, sumX2 = 0;
                 for (let i = 0; i < n; i++) {
-                    sumX += xVals[i]; sumY += yVals[i];
+                    sumX += xVals[i]; sumY2 += yVals[i];
                     sumXY += xVals[i]*yVals[i]; sumX2 += xVals[i]*xVals[i];
                 }
-                let k = (n*sumXY - sumX*sumY)/(n*sumX2 - sumX*sumX);
-                let b = (sumY - k*sumX)/n;
+                let k = (n*sumXY - sumX*sumY2)/(n*sumX2 - sumX*sumX);
+                let b = (sumY2 - k*sumX)/n;
                 let y1 = k*minX + b, y2 = k*maxX + b;
                 ctx.moveTo(toX(minX), toY(y1));
                 ctx.lineTo(toX(maxX), toY(y2));
             } else if (type === 'quadratic') {
                 let n = xVals.length;
-                let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumX3 = 0, sumX4 = 0, sumX2Y = 0;
+                let sumX = 0, sumY2 = 0, sumXY = 0, sumX2 = 0, sumX3 = 0, sumX4 = 0, sumX2Y = 0;
                 for (let i = 0; i < n; i++) {
-                    sumX += xVals[i]; sumY += yVals[i];
+                    sumX += xVals[i]; sumY2 += yVals[i];
                     sumXY += xVals[i]*yVals[i]; sumX2 += xVals[i]*xVals[i];
-                    sumX3 += xVals[i]**3; sumX4 += xVals[i]**4;
+                    sumX3 += Math.pow(xVals[i], 3); sumX4 += Math.pow(xVals[i], 4);
                     sumX2Y += xVals[i]*xVals[i]*yVals[i];
                 }
                 let det = n*(sumX2*sumX4 - sumX3*sumX3) - sumX*(sumX*sumX4 - sumX2*sumX3) + sumX2*(sumX*sumX3 - sumX2*sumX2);
-                let detA = sumY*(sumX2*sumX4 - sumX3*sumX3) - sumX*(sumXY*sumX4 - sumX2Y*sumX3) + sumX2*(sumXY*sumX3 - sumX2Y*sumX2);
-                let detB = n*(sumXY*sumX4 - sumX2Y*sumX3) - sumY*(sumX*sumX4 - sumX2*sumX3) + sumX2*(sumX*sumX2Y - sumXY*sumX2);
-                let detC = n*(sumX2*sumX2Y - sumX3*sumXY) - sumX*(sumX*sumX2Y - sumX2*sumXY) + sumY*(sumX*sumX3 - sumX2*sumX2);
+                let detA = sumY2*(sumX2*sumX4 - sumX3*sumX3) - sumX*(sumXY*sumX4 - sumX2Y*sumX3) + sumX2*(sumXY*sumX3 - sumX2Y*sumX2);
+                let detB = n*(sumXY*sumX4 - sumX2Y*sumX3) - sumY2*(sumX*sumX4 - sumX2*sumX3) + sumX2*(sumX*sumX2Y - sumXY*sumX2);
+                let detC = n*(sumX2*sumX2Y - sumX3*sumXY) - sumX*(sumX*sumX2Y - sumX2*sumXY) + sumY2*(sumX*sumX3 - sumX2*sumX2);
                 let a = detA/det, b = detB/det, c = detC/det;
                 for (let x = minX; x <= maxX; x += 0.1) {
                     let y = a*x*x + b*x + c;
@@ -385,7 +392,7 @@
             } else if (type === 'exponential') {
                 let n = xVals.length;
                 let sumX = 0, sumLnY = 0, sumXLnY = 0, sumX2 = 0;
-                let lnY = yVals.map(y => Math.log(y));
+                let lnY = yVals.map(function(y) { return Math.log(y); });
                 for (let i = 0; i < n; i++) {
                     sumX += xVals[i]; sumLnY += lnY[i];
                     sumXLnY += xVals[i]*lnY[i]; sumX2 += xVals[i]*xVals[i];
@@ -400,14 +407,14 @@
                 }
             } else if (type === 'logarithmic') {
                 let n = xVals.length;
-                let sumLnX = 0, sumY = 0, sumYLnX = 0, sumLnX2 = 0;
-                let lnX = xVals.map(x => Math.log(x));
+                let sumLnX = 0, sumY2 = 0, sumYLnX = 0, sumLnX2 = 0;
+                let lnX = xVals.map(function(x) { return Math.log(x); });
                 for (let i = 0; i < n; i++) {
-                    sumLnX += lnX[i]; sumY += yVals[i];
+                    sumLnX += lnX[i]; sumY2 += yVals[i];
                     sumYLnX += yVals[i]*lnX[i]; sumLnX2 += lnX[i]*lnX[i];
                 }
-                let k = (n*sumYLnX - sumY*sumLnX)/(n*sumLnX2 - sumLnX*sumLnX);
-                let b = (sumY - k*sumLnX)/n;
+                let k = (n*sumYLnX - sumY2*sumLnX)/(n*sumLnX2 - sumLnX*sumLnX);
+                let b = (sumY2 - k*sumLnX)/n;
                 for (let x = 0.1; x <= maxX; x += 0.1) {
                     let y = k*Math.log(x) + b;
                     if (x === 0.1) ctx.moveTo(toX(x), toY(y));
@@ -416,7 +423,6 @@
             }
             ctx.stroke();
             
-            // РџСЂРѕРіРЅРѕР·РЅР°СЏ С‚РѕС‡РєР°
             let px = toX(predX);
             let py = toY(predY);
             ctx.fillStyle = '#e74c3c';
@@ -428,7 +434,7 @@
             ctx.stroke();
             ctx.fillStyle = '#333';
             ctx.font = 'bold 13px Arial';
-            ctx.fillText(`РџСЂРѕРіРЅРѕР·: ${predY}`, px, py - 18);
+            ctx.fillText('Прогноз: ' + predY, px, py - 18);
         }
     </script>
 
