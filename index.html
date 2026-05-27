@@ -98,6 +98,7 @@
             border-radius: 8px;
             width: 100%;
             max-width: 850px;
+            touch-action: manipulation;
         }
         .tooltip {
             position: absolute;
@@ -313,7 +314,6 @@
             let canvas = document.getElementById('chart');
             let ctx = canvas.getContext('2d');
             let tooltip = document.getElementById('tooltip');
-            let container = document.getElementById('chartContainer');
             
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             tooltip.style.display = 'none';
@@ -336,8 +336,6 @@
             
             function toX(val) { return padding + (val - minX) / (maxX - minX) * w; }
             function toY(val) { return padding + h - (val - minY) / (maxY - minY) * h; }
-            function fromX(cx) { return minX + (cx - padding) / w * (maxX - minX); }
-            function fromY(cy) { return minY + (padding + h - cy) / h * (maxY - minY); }
             
             // Оси
             ctx.strokeStyle = '#333';
@@ -348,7 +346,7 @@
             ctx.lineTo(padding + w, padding + h);
             ctx.stroke();
             
-            // Подписи оси X — только целые
+            // Подписи оси X
             ctx.fillStyle = '#333';
             ctx.font = '12px Arial';
             ctx.textAlign = 'center';
@@ -359,7 +357,7 @@
                 }
             }
             
-            // Подписи оси Y — только 5 штук
+            // Подписи оси Y
             ctx.textAlign = 'right';
             let ySteps = 5;
             let yStep = (maxY - minY) / ySteps;
@@ -496,15 +494,12 @@
             ctx.font = 'bold 13px Arial';
             ctx.fillText('Прогноз: ' + predY, px, py - 18);
             
-            // Всплывающая подсказка при движении мыши
-            canvas.onmousemove = function(e) {
-                let rect = canvas.getBoundingClientRect();
-                let mouseX = e.clientX - rect.left;
-                let mouseY = e.clientY - rect.top;
+            // Функция поиска ближайшей точки
+            function findClosest(mouseX, mouseY) {
+                let minDist = 25;
+                let closest = null;
                 
                 // Ищем ближайшую точку тренда
-                let minDist = 20;
-                let closest = null;
                 for (let i = 0; i < trendPoints.length; i++) {
                     let dx = mouseX - trendPoints[i].x;
                     let dy = mouseY - trendPoints[i].y;
@@ -526,6 +521,10 @@
                     }
                 }
                 
+                return closest;
+            }
+            
+            function showTooltip(closest, eventX, eventY) {
                 if (closest) {
                     let text;
                     if (closest.isData) {
@@ -540,11 +539,51 @@
                 } else {
                     tooltip.style.display = 'none';
                 }
+            }
+            
+            // Поддержка мыши
+            canvas.onmousemove = function(e) {
+                let rect = canvas.getBoundingClientRect();
+                let scaleX = canvas.width / rect.width;
+                let scaleY = canvas.height / rect.height;
+                let mouseX = (e.clientX - rect.left) * scaleX;
+                let mouseY = (e.clientY - rect.top) * scaleY;
+                let closest = findClosest(mouseX, mouseY);
+                showTooltip(closest);
             };
             
             canvas.onmouseleave = function() {
                 tooltip.style.display = 'none';
             };
+            
+            // Поддержка касания (телефон)
+            canvas.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                let rect = canvas.getBoundingClientRect();
+                let scaleX = canvas.width / rect.width;
+                let scaleY = canvas.height / rect.height;
+                let mouseX = (e.touches[0].clientX - rect.left) * scaleX;
+                let mouseY = (e.touches[0].clientY - rect.top) * scaleY;
+                let closest = findClosest(mouseX, mouseY);
+                showTooltip(closest, mouseX, mouseY);
+            });
+            
+            canvas.addEventListener('touchmove', function(e) {
+                e.preventDefault();
+                let rect = canvas.getBoundingClientRect();
+                let scaleX = canvas.width / rect.width;
+                let scaleY = canvas.height / rect.height;
+                let mouseX = (e.touches[0].clientX - rect.left) * scaleX;
+                let mouseY = (e.touches[0].clientY - rect.top) * scaleY;
+                let closest = findClosest(mouseX, mouseY);
+                showTooltip(closest, mouseX, mouseY);
+            });
+            
+            canvas.addEventListener('touchend', function() {
+                setTimeout(function() {
+                    tooltip.style.display = 'none';
+                }, 2000);
+            });
         }
     </script>
 
