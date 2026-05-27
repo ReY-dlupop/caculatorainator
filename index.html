@@ -314,20 +314,36 @@
         } else if (currentType === 'quadratic') {
             let sumX3 = 0, sumX4 = 0, sumX2Y = 0;
             for (let i = 0; i < n; i++) {
-                sumX3 += Math.pow(xValues[i], 3);
-                sumX4 += Math.pow(xValues[i], 4);
-                sumX2Y += xValues[i] * xValues[i] * yValues[i];
+                let x2 = xValues[i] * xValues[i];
+                sumX3 += x2 * xValues[i];
+                sumX4 += x2 * x2;
+                sumX2Y += x2 * yValues[i];
             }
-            let det = n * (sumX2 * sumX4 - sumX3 * sumX3) - sumX * (sumX * sumX4 - sumX2 * sumX3) + sumX2 * (sumX * sumX3 - sumX2 * sumX2);
-            let detA = sumY * (sumX2 * sumX4 - sumX3 * sumX3) - sumX * (sumXY * sumX4 - sumX2Y * sumX3) + sumX2 * (sumXY * sumX3 - sumX2Y * sumX2);
-            let detB = n * (sumXY * sumX4 - sumX2Y * sumX3) - sumY * (sumX * sumX4 - sumX2 * sumX3) + sumX2 * (sumX * sumX2Y - sumXY * sumX2);
-            let detC = n * (sumX2 * sumX2Y - sumX3 * sumXY) - sumX * (sumX * sumX2Y - sumX2 * sumXY) + sumY * (sumX * sumX3 - sumX2 * sumX2);
+            
+            let det = n * (sumX2 * sumX4 - sumX3 * sumX3) 
+                    - sumX * (sumX * sumX4 - sumX2 * sumX3) 
+                    + sumX2 * (sumX * sumX3 - sumX2 * sumX2);
+            
+            let detC = sumY * (sumX2 * sumX4 - sumX3 * sumX3) 
+                     - sumX * (sumXY * sumX4 - sumX2Y * sumX3) 
+                     + sumX2 * (sumXY * sumX3 - sumX2Y * sumX2);
+            
+            let detB = n * (sumXY * sumX4 - sumX2Y * sumX3) 
+                     - sumY * (sumX * sumX4 - sumX2 * sumX3) 
+                     + sumX2 * (sumX * sumX2Y - sumXY * sumX2);
+            
+            let detA = n * (sumX2 * sumX2Y - sumX3 * sumXY) 
+                     - sumX * (sumX * sumX2Y - sumX2 * sumXY) 
+                     + sumY * (sumX * sumX3 - sumX2 * sumX2);
+            
             let a = detA / det;
             let b = detB / det;
             let c = detC / det;
+            
             a = Math.round(a * 100) / 100;
             b = Math.round(b * 100) / 100;
             c = Math.round(c * 100) / 100;
+            
             prediction = Math.round((a * predictX * predictX + b * predictX + c) * 10) / 10;
             formulaText = 'y = ' + a + 'x² + ' + b + 'x + ' + c;
             trendName = 'Квадратичный тренд (парабола)';
@@ -377,7 +393,6 @@
         let container = document.getElementById('chartContainer');
         let tooltip = document.getElementById('tooltip');
         
-        // Адаптивный размер canvas
         let containerWidth = container.clientWidth;
         let size = Math.min(containerWidth, 850);
         canvas.width = size;
@@ -499,18 +514,27 @@
             let n = xVals.length;
             let sX = 0, sY = 0, sXY = 0, sX2 = 0, sX3 = 0, sX4 = 0, sX2Y = 0;
             for (let i = 0; i < n; i++) {
+                let x2 = xVals[i] * xVals[i];
                 sX += xVals[i]; sY += yVals[i];
-                sXY += xVals[i]*yVals[i]; sX2 += xVals[i]*xVals[i];
-                sX3 += Math.pow(xVals[i], 3); sX4 += Math.pow(xVals[i], 4);
-                sX2Y += xVals[i]*xVals[i]*yVals[i];
+                sXY += xVals[i] * yVals[i]; sX2 += x2;
+                sX3 += x2 * xVals[i]; sX4 += x2 * x2;
+                sX2Y += x2 * yVals[i];
             }
-            let det = n*(sX2*sX4 - sX3*sX3) - sX*(sX*sX4 - sX2*sX3) + sX2*(sX*sX3 - sX2*sX2);
-            let detA = sY*(sX2*sX4 - sX3*sX3) - sX*(sXY*sX4 - sX2Y*sX3) + sX2*(sXY*sX3 - sX2Y*sX2);
-            let detB = n*(sXY*sX4 - sX2Y*sX3) - sY*(sX*sX4 - sX2*sX3) + sX2*(sX*sX2Y - sXY*sX2);
-            let detC = n*(sX2*sX2Y - sX3*sXY) - sX*(sX*sX2Y - sX2*sXY) + sY*(sX*sX3 - sX2*sX2);
-            let a = detA/det, b = detB/det, c = detC/det;
+            let det = n * (sX2 * sX4 - sX3 * sX3) 
+                    - sX * (sX * sX4 - sX2 * sX3) 
+                    + sX2 * (sX * sX3 - sX2 * sX2);
+            let detC = sY * (sX2 * sX4 - sX3 * sX3) 
+                     - sX * (sXY * sX4 - sX2Y * sX3) 
+                     + sX2 * (sXY * sX3 - sX2Y * sX2);
+            let detB = n * (sXY * sX4 - sX2Y * sX3) 
+                     - sY * (sX * sX4 - sX2 * sX3) 
+                     + sX2 * (sX * sX2Y - sXY * sX2);
+            let detA = n * (sX2 * sX2Y - sX3 * sXY) 
+                     - sX * (sX * sX2Y - sX2 * sXY) 
+                     + sY * (sX * sX3 - sX2 * sX2);
+            let a = detA / det, b = detB / det, c = detC / det;
             for (let x = minX; x <= maxX; x += step) {
-                let y = a*x*x + b*x + c;
+                let y = a * x * x + b * x + c;
                 let cx = toX(x), cy = toY(y);
                 trendPoints.push({x: cx, y: cy, xVal: Math.round(x*10)/10, yVal: Math.round(y*10)/10});
                 if (firstPoint) { ctx.moveTo(cx, cy); firstPoint = false; }
